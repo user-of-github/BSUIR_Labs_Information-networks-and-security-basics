@@ -1,0 +1,11 @@
+*/.idea
+*/cmake-build-debug
+*/CMakeLists.txt
+cmake-build-debug
+/cmake-build-debug
+.idea
+/.idea
+temp
+build
+node_modules
+node_modules/
