@@ -1,12 +1,11 @@
-import { BYTES_COUNT } from './DES_data'
+import { Bit } from './DES_types'
 
-export type Bit = 1 | 0
 
 
 // to fill with zeros if necessary
-export const convertToBinaryWithZerosBeforeNumber = (byte: number): string => {
+export const convertToBinaryWithZerosBeforeNumber = (byte: number, necessaryLength: number): string => {
     const initial: string = byte.toString(2)
-    const response: string = [...Array(BYTES_COUNT - initial.length).fill(0), ...initial].join('')
+    const response: string = [...Array(necessaryLength - initial.length).fill(0), ...initial].join('')
     return response
 }
 

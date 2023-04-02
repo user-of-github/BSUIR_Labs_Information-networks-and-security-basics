@@ -1,5 +1,3 @@
-// Table of Position of 64 bits at initial level: Initial Permutation Table
-
 export const BYTES_COUNT: number = 8
 
 export const INITIAL_PERMUTATION: number[] = [
@@ -47,7 +45,7 @@ export const EXPANSION_TABLE: number[] = [
     28, 29, 28, 29, 30, 31, 32, 1
 ]
 
-export const S_BOX: number[][][] = [
+export const S_BOXES: number[][][] = [
     [
         [14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7],
         [0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8],
