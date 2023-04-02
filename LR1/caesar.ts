@@ -29,14 +29,13 @@ const decryptFromCaesar = (encryptedMessage: string, key: number): string => {
 
 
 const main = (): void => {
-    const testMessage: string = 'TEST MESSAGE !'
+    const testMessage: string = 'TEST MESSAGE !'.toUpperCase()
 
     const encrypted: string = encryptByCaesar(testMessage, 2)
     const decrypted: string = decryptFromCaesar(encrypted, 2)
 
     console.log(encrypted)
     console.log(decrypted)
-    
 }
 
 main()

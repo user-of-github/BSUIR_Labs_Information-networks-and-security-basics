@@ -50,9 +50,10 @@ const decryptFromVigener = (message: string, fullKey: string): string => {
 
 
 const main = (): void => {
-    const baseKey: string = 'LEMON'
+    const baseKey: string = 'LEMON'.toUpperCase()
     
-    const message: string = 'ATTACK AT DAWN'
+    const message: string = 'ATTACK AT DAWN'.toUpperCase()
+    
     const fullKey: string = generateFullKey(baseKey, message.length)
 
     const encrypted: string = encryptByVigener(message, fullKey)
