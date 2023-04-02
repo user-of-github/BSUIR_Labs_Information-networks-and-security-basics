@@ -1,5 +1,18 @@
-import { BYTES_COUNT, INITIAL_PERMUTATION, KEY_PERMUTATION, KEY_FINAL_PERMUTATION } from './DES_data'
-import { splitArrayIntoTwoEqualParts, convertToBinaryWithZerosBeforeNumber, getKeyAfterShiftingItPartsToLeft } from './DES_utils'
+import { 
+    BYTES_COUNT, 
+    INITIAL_PERMUTATION, 
+    KEY_PERMUTATION, 
+    KEY_FINAL_PERMUTATION, 
+    EXPANSION_TABLE 
+} from './DES_data'
+import { 
+    Bit,
+    splitArrayIntoTwoEqualParts, 
+    convertToBinaryWithZerosBeforeNumber, 
+    getKeyAfterShiftingItPartsToLeft,
+    xorBitArrays,
+    getSBlocks
+} from './DES_utils'
 
 
 export const encryptWithDES = (messageSource: string, keySource: string): string => {
@@ -11,23 +24,29 @@ export const encryptWithDES = (messageSource: string, keySource: string): string
     const keyBytes: number[] = [...Array(BYTES_COUNT - keyBytesInitial.length).fill(0), ...keyBytesInitial]
 
     // split message to bits and initially permutate it. Then split on left and right parts
-    const messageBits: number[] = Array.from(messageBytes.map(convertToBinaryWithZerosBeforeNumber).join('')).map(Number)
-    const messageBitsInitiallyPermutated: number[] = INITIAL_PERMUTATION.map((index: number): number => messageBits[index - 1])
+    const messageBits: Bit[] = Array.from(messageBytes.map(convertToBinaryWithZerosBeforeNumber).join('')).map(Number) as Bit[]
+    const messageBitsInitiallyPermutated: Bit[] = INITIAL_PERMUTATION.map((index: number): Bit => messageBits[index - 1])
     const [L0, R0] = splitArrayIntoTwoEqualParts(messageBitsInitiallyPermutated)
 
     // split key on bits and permutate it
-    const keyBits: number[] = Array.from(keyBytes.map(convertToBinaryWithZerosBeforeNumber).join('')).map(Number)
-    const keyBitsPermutated: number[] = KEY_PERMUTATION.map((index: number): number => keyBits[index - 1])
+    const keyBits: Bit[] = Array.from(keyBytes.map(convertToBinaryWithZerosBeforeNumber).join('')).map(Number) as Bit[]
+    const keyBitsPermutated: Bit[] = KEY_PERMUTATION.map((index: number): Bit => keyBits[index - 1])
     
     // shift left and right parts of key
-    const keyWithShiftedParts: number[] = getKeyAfterShiftingItPartsToLeft(keyBitsPermutated, 1)
+    const keyWithShiftedParts: Bit[] = getKeyAfterShiftingItPartsToLeft(keyBitsPermutated, 1)
 
     // permutate it accorfing to key final permutation table ===> so I'll get key of 1st round
-    const keyFinallyPermutated: number[] = KEY_FINAL_PERMUTATION.map((index: number): number => keyWithShiftedParts[index - 1])
-    // keyFinallyPermutated <==> key of 1st round
+    const keyFinallyPermutated: Bit[] = KEY_FINAL_PERMUTATION.map((index: number): Bit => keyWithShiftedParts[index - 1])
+    // keyFinallyPermutated <==> key of 1st round <==> K1
 
 
     // now expanding (extending) right part of message (R0) from 32 bits to 48 bits
+    const expandedR0: Bit[] = EXPANSION_TABLE.map((index: number): Bit => R0[index - 1])
+
+    const expandedR0xoredWithK1: Bit[] = xorBitArrays(expandedR0, keyFinallyPermutated)
+
+    const [s1, s2, s3, s4, s5, s6, s7, s8] = getSBlocks(expandedR0xoredWithK1)
+    
 
     return messageSource
 }

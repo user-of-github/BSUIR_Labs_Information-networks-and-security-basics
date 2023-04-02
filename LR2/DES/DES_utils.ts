@@ -1,5 +1,7 @@
 import { BYTES_COUNT } from './DES_data'
 
+export type Bit = 1 | 0
+
 
 // to fill with zeros if necessary
 export const convertToBinaryWithZerosBeforeNumber = (byte: number): string => {
@@ -25,7 +27,7 @@ export const performSeveralLeftCycleShifts = <ValueType>(array: ValueType[], shi
 }
 
 // we need to shift separately key's left part and key's right part
-export const getKeyAfterShiftingItPartsToLeft = (initialKey: number[], shiftCount: number): number[] => {
+export const getKeyAfterShiftingItPartsToLeft = (initialKey: Bit[], shiftCount: number): Bit[] => {
     const [leftPart, rightPart] = splitArrayIntoTwoEqualParts(initialKey)
 
     performSeveralLeftCycleShifts(leftPart, 1)
@@ -36,9 +38,35 @@ export const getKeyAfterShiftingItPartsToLeft = (initialKey: number[], shiftCoun
 
 export const splitArrayIntoTwoEqualParts = <ValueType>(array: ValueType[]): [ValueType[], ValueType[]] => {
     const middleIndex: number = Math.ceil(array.length / 2)
-    
+
     const left: ValueType[] = array.slice(0, middleIndex)
     const right: ValueType[] = array.slice(-middleIndex)
 
     return [left, right]
+}
+
+export const xorBitArrays = (first: Bit[], second: Bit[]): Bit[] => {
+    return first.map((firstBit: Bit, index: number): Bit => {
+        const secondBit: Bit = second[index]
+
+        if (firstBit === 0 && secondBit === 0) return 0
+        if (firstBit === 1 && secondBit === 1) return 0
+
+        return 1
+    })
+}
+
+export const getSBlocks = (array: Bit[]): [Bit[], Bit[], Bit[], Bit[], Bit[], Bit[], Bit[], Bit[]] => {
+    if (array.length !== 48) throw Error('getSBlocks: array\'s length does not equal 48')
+
+    return [
+        array.slice(0, 6),
+        array.slice(6, 12),
+        array.slice(12, 18),
+        array.slice(18, 24),
+        array.slice(24, 30),
+        array.slice(30, 36),
+        array.slice(36, 42),
+        array.slice(42, 48)
+    ]
 }
