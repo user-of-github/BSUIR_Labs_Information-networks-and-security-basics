@@ -45,6 +45,8 @@ export const splitArrayIntoTwoEqualParts = <ValueType>(array: ValueType[]): [Val
 }
 
 export const xorBitArrays = (first: Bit[], second: Bit[]): Bit[] => {
+    if (first.length !== second.length) throw Error('xorBitArrays: The lengths of the arrays do not match')
+    
     return first.map((firstBit: Bit, index: number): Bit => {
         const secondBit: Bit = second[index]
 
@@ -68,4 +70,14 @@ export const getSBlocks = (array: Bit[]): [Bit[], Bit[], Bit[], Bit[], Bit[], Bi
         array.slice(36, 42),
         array.slice(42, 48)
     ]
+}
+
+export const transformSBlockWithHelpOfSBox = (sBlock: Bit[], sBlockIndex: number, S_BOXES: number[][][]): string => {
+    const rowNumber: number = Number.parseInt([sBlock[0], sBlock[sBlock.length - 1]].join(''), 2)
+    const colNumber: number = Number.parseInt(sBlock.slice(1, sBlock.length - 2).join(''), 2)
+
+    const valueFromSBlocksArray: number = S_BOXES[sBlockIndex][rowNumber][colNumber]
+    const binaryValue: string = convertToBinaryWithZerosBeforeNumber(valueFromSBlocksArray, 4)
+
+    return binaryValue
 }
