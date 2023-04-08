@@ -3,7 +3,7 @@
     "@types/node": "^18.15.11"
   },
   "scripts": {
-    "run-des-example": "ts-node DES_remastered/DES.ts"
+    "run-des-example": "ts-node src/test-des.ts"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",

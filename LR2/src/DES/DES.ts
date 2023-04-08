@@ -56,7 +56,10 @@ export class DES {
 
         const binaryResponse: string = DES.blocks.join('');
 
-        return DES.convertStringFromBinaryFormat(binaryResponse);
+        const untrimmedResponse: string = DES.convertStringFromBinaryFormat(binaryResponse);
+        const trimmedResponse: string = DES.cutSymbolsFromStartAndEndOfString(untrimmedResponse, DES.blankSymbol);
+
+        return trimmedResponse;
     }
 
     private static encodeSingleBlockWithDESPerOneRound(block: string, key: string): string {
@@ -115,7 +118,7 @@ export class DES {
             const subBlock: string = source.slice(index * lengthOfBlock, index * lengthOfBlock + lengthOfBlock);
             //console.log('SUBBLOCK', subBlock)
             DES.blocks[index] = DES.convertStringToBinaryFormat(subBlock);
-            console.log('SUBBLOCK ', DES.blocks[index]);
+            //console.log('SUBBLOCK ', DES.blocks[index]);
         }
     }
 
@@ -243,15 +246,3 @@ export class DES {
         return response;
     }
 }
-
-
-const message = 'message';
-const key = 'key';
-
-
-const encrypted: string = DES.encrypt(message, key);
-const decrypted = DES.decrypt(encrypted, key);
-
-//console.log('ENCRYPTED: ', encrypted)
-//console.log('ENCRYPTED BYTES: ', Array.from(encrypted).map(symbol => symbol.charCodeAt(0)))
-console.log(decrypted);

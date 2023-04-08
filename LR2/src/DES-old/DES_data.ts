@@ -1,4 +1,4 @@
-export const BYTES_COUNT: number = 8
+export const BYTES_COUNT: number = 8;
 
 export const INITIAL_PERMUTATION: number[] = [
     58, 50, 42, 34, 26, 18, 10, 2,
@@ -9,7 +9,7 @@ export const INITIAL_PERMUTATION: number[] = [
     59, 51, 43, 35, 27, 19, 11, 3,
     61, 53, 45, 37, 29, 21, 13, 5,
     63, 55, 47, 39, 31, 23, 15, 7
-]
+];
 
 export const KEY_PERMUTATION: number[] = [
     57, 49, 41, 33, 25, 17, 9,
@@ -20,9 +20,9 @@ export const KEY_PERMUTATION: number[] = [
     7, 62, 54, 46, 38, 30, 22,
     14, 6, 61, 53, 45, 37, 29,
     21, 13, 5, 28, 20, 12, 4
-]
+];
 
-export const SHIFT_TABLE: number[] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1]
+export const SHIFT_TABLE: number[] = [1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1];
 
 export const KEY_FINAL_PERMUTATION: number[] = [
     14, 17, 11, 24, 1, 5,
@@ -33,7 +33,7 @@ export const KEY_FINAL_PERMUTATION: number[] = [
     30, 40, 51, 45, 33, 48,
     44, 49, 39, 56, 34, 53,
     46, 42, 50, 36, 29, 32
-]
+];
 
 // to expand R0 from 32 bits to 48 bits
 export const EXPANSION_TABLE: number[] = [
@@ -43,7 +43,7 @@ export const EXPANSION_TABLE: number[] = [
     16, 17, 18, 19, 20, 21, 20, 21,
     22, 23, 24, 25, 24, 25, 26, 27,
     28, 29, 28, 29, 30, 31, 32, 1
-]
+];
 
 export const S_BOXES: number[][][] = [
     [
@@ -101,7 +101,7 @@ export const S_BOXES: number[][][] = [
         [7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8],
         [2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11]
     ]
-]
+];
 
 export const FINAL_PERMUTATION: number[] = [
     16, 7, 20, 21,
@@ -112,4 +112,4 @@ export const FINAL_PERMUTATION: number[] = [
     32, 27, 3, 9,
     19, 13, 30, 6,
     22, 11, 4, 25
-]
+];
