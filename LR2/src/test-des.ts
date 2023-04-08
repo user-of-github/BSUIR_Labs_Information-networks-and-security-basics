@@ -1,12 +1,12 @@
-import { DES } from './DES/DES';
+import { DesService } from './DES/DesService';
 
 
 const testDESAlgorithm = (): void => {
     const testMessage = 'Here\'s a message with spaces and LARGE TEXT';
     const testKey = 'some-advanced-key-2023';
 
-    const encrypted: string = DES.encrypt(testMessage, testKey);
-    const decrypted = DES.decrypt(encrypted, testKey);
+    const encrypted: string = DesService.encrypt(testMessage, testKey);
+    const decrypted = DesService.decrypt(encrypted, testKey);
     console.log('INITIAL MESSAGE: {', testMessage, '} INITIAL KEY: {', testKey, '}');
     console.log('ENCRYPTED: {', encrypted, '}');
     //console.log('ENCRYPTED BYTES: ', [...encrypted].map(symbol => symbol.charCodeAt(0)));

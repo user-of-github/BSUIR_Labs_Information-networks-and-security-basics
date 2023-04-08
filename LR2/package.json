@@ -3,7 +3,8 @@
     "@types/node": "^18.15.11"
   },
   "scripts": {
-    "run-des-example": "ts-node src/test-des.ts"
+    "run-kerberos-demo": "ts-node src/index.ts",
+    "run-des-demo": "ts-node src/test-des.ts"
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
