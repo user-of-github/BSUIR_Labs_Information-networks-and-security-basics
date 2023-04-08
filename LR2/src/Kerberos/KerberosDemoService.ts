@@ -10,7 +10,9 @@ export abstract class KerberosDemoService {
         ['user_of_discord', 'password']
     ]);
 
+    private static clientSessionKey: string = 'clientsessionkey'
     private static sessionKey: string = 'sessionkey';
+    private static masterKey: string = 'masterkey';
 
 
     public static async runDemonstration(userName: string, userPassword: string): Promise<void> {
@@ -21,6 +23,20 @@ export abstract class KerberosDemoService {
 
         // STEP 2 { AS ---> C }
         const seversResponse: string = await KerberosDemoService.secondStep(userName, clientTimeNow.toString(), userPassword);
+
+        const decryptedServersResponse: string = DesService.decrypt(seversResponse, userPassword);
+        const tgtTimeStampAndSessionKey: string[] = decryptedServersResponse.split(KerberosDemoService.stringSeparator);
+
+      //  console.log(tgtTimeStampAndSessionKey);
+
+        KerberosDemoService.clientSessionKey = tgtTimeStampAndSessionKey[2];
+      //  console.log(KerberosDemoService.clientSessionKey);
+
+        // STEP 3 { C ----> TGS }
+        const messageSentToTgsServer: string = await KerberosDemoService.thirdStep(tgtTimeStampAndSessionKey);
+
+        // STEP 4 { TGS ---> C }
+        await KerberosDemoService.fourthStep(messageSentToTgsServer)
     }
 
     // checks user on server by sending encrypted message there
@@ -54,7 +70,7 @@ export abstract class KerberosDemoService {
                 exitWithMessage('[STEP 1] Sent date (message) or password (key) is wrong...');
             }
         } else {
-            exitWithMessage(`User ${userName} does not exist in database`);
+            exitWithMessage(`[STEP 1] User ${userName} does not exist in database`);
         }
     }
 
@@ -68,12 +84,12 @@ export abstract class KerberosDemoService {
             new Date().toString()
         ].join(KerberosDemoService.stringSeparator);
 
-        const encryptedTgt = DesService.encrypt(tgtRaw, KerberosDemoService.sessionKey);
+        const encryptedTgt = DesService.encrypt(tgtRaw, KerberosDemoService.masterKey);
         console.info(`[STEP 2] Raw TGT: ${tgtRaw}`);
         console.info(`[STEP 2] Encrypted TGT: ${encryptedTgt}`);
 
         await sleep(1000);
-        console.log('[STEP 2] Combining server\s response to user')
+        console.info('[STEP 2] Combining server\s response to user')
 
         const toUser: string = [encryptedTgt, timestamp, KerberosDemoService.sessionKey].join(KerberosDemoService.stringSeparator);
         const encryptedResponse: string = DesService.encrypt(toUser, password);
@@ -81,5 +97,43 @@ export abstract class KerberosDemoService {
         return encryptedResponse;
     }
 
+    // request to Ticket-Granting-Server ( <=> TGS ) (generating message for it)
+    private static async thirdStep(tgtTimeStampAndSessionKey: string[]): Promise<string> {
+        console.info('[STEP 3] Request to TGS server');
+        await sleep(1000);
 
+        const toTgsServer: string  = [
+            tgtTimeStampAndSessionKey[0],
+            DesService.encrypt(new Date().toString(), KerberosDemoService.clientSessionKey)
+        ].join(KerberosDemoService.stringSeparator); // 174
+
+       return toTgsServer;
+    }
+
+    private static async fourthStep(message: string): Promise<void> {
+        // 187
+        console.info('[STEP 4] Received message from client, decrypting it');
+        await sleep(1000);
+
+        const toTGSData = message.split(KerberosDemoService.stringSeparator);
+        const decryptedTGT: string = DesService.decrypt(toTGSData[0], KerberosDemoService.masterKey);
+        const tgtData = decryptedTGT.split(KerberosDemoService.stringSeparator);
+
+        console.info('[STEP 4] I am TGS server and I\'ve received: ')
+        console.info('[STEP 4] ', decryptedTGT)
+        /*
+        timeStamp = DateTime.Parse(DES.Decipher(toTGSData[1], tgtData[0])); // tgtData[0] - session key from TGT
+        var tgtTimeStamp = DateTime.Parse(tgtData[3]); //tgtData[3] - time stamp from TGT
+        if (timeStamp.AddMinutes(2) > tgtTimeStamp) // Timestamp from auth block ~ equals TGT blocks` timestamp
+        {
+            Console.WriteLine("TGS Authentification passed!");
+            Console.WriteLine($"Decripted TGT: {decriptedTGT}\n{new string('-', 40)}");
+        }
+        else
+        {
+            Console.WriteLine("TGS Authentification failed!");
+            Console.ReadLine();
+            return;
+        }*/
+    }
 }
