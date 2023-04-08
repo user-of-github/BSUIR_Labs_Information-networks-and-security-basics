@@ -2,6 +2,9 @@
   "devDependencies": {
     "@types/node": "^18.15.11"
   },
+  "scripts": {
+    "run-des-example": "ts-node DES_remastered/DES.ts"
+  },
   "dependencies": {
     "@types/axios": "^0.14.0",
     "axios": "^1.3.4"
