@@ -1,4 +1,4 @@
-import { KerberosDemoService } from './Kerberos/Kerberos';
+import { KerberosDemoService } from './Kerberos/KerberosDemoService';
 
 const main = async (): Promise<void> => {
     const testUser: string = 'user_of_kerberos';
