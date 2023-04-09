@@ -10,12 +10,13 @@ export abstract class KerberosDemoService {
         ['user_of_discord', 'password']
     ]);
 
-    private static clientSessionKey: string = 'clientsessionkey'
+    private static clientSessionKey: string = 'clientsessionkey';
     private static sessionKey: string = 'sessionkey';
     private static masterKey: string = 'masterkey';
+    private static serverMasterKey: string = 'servermasterkey';
+    private static keyForInteractionWithSS: string = 'keykcss';
 
-
-    public static async runDemonstration(userName: string, userPassword: string): Promise<void> {
+    public static async runKerberosSimuation(userName: string, userPassword: string): Promise<void> {
         const clientTimeNow: Date = new Date();
 
         // STEP 1 { C ---> AS }
@@ -26,17 +27,24 @@ export abstract class KerberosDemoService {
 
         const decryptedServersResponse: string = DesService.decrypt(seversResponse, userPassword);
         const tgtTimeStampAndSessionKey: string[] = decryptedServersResponse.split(KerberosDemoService.stringSeparator);
-
-      //  console.log(tgtTimeStampAndSessionKey);
+        //  console.log(tgtTimeStampAndSessionKey);
 
         KerberosDemoService.clientSessionKey = tgtTimeStampAndSessionKey[2];
-      //  console.log(KerberosDemoService.clientSessionKey);
+        //  console.log(KerberosDemoService.clientSessionKey);
 
         // STEP 3 { C ----> TGS }
         const messageSentToTgsServer: string = await KerberosDemoService.thirdStep(tgtTimeStampAndSessionKey);
 
         // STEP 4 { TGS ---> C }
-        await KerberosDemoService.fourthStep(messageSentToTgsServer)
+        const ticket: string = await KerberosDemoService.fourthStep(messageSentToTgsServer, userName);
+        const decryptedTicket: string = DesService.decrypt(ticket, KerberosDemoService.sessionKey);
+
+        console.info('Received ticket from TGS server: ', decryptedTicket);
+
+        const clientKCs: string = decryptedTicket.split('/')[1];
+        console.info(`user K_cs: ${clientKCs}`);
+
+        // STEP 5 { C ---> SS }
     }
 
     // checks user on server by sending encrypted message there
@@ -89,7 +97,7 @@ export abstract class KerberosDemoService {
         console.info(`[STEP 2] Encrypted TGT: ${encryptedTgt}`);
 
         await sleep(1000);
-        console.info('[STEP 2] Combining server\s response to user')
+        console.info('[STEP 2] Combining server\s response to user');
 
         const toUser: string = [encryptedTgt, timestamp, KerberosDemoService.sessionKey].join(KerberosDemoService.stringSeparator);
         const encryptedResponse: string = DesService.encrypt(toUser, password);
@@ -102,15 +110,15 @@ export abstract class KerberosDemoService {
         console.info('[STEP 3] Request to TGS server');
         await sleep(1000);
 
-        const toTgsServer: string  = [
+        const toTgsServer: string = [
             tgtTimeStampAndSessionKey[0],
             DesService.encrypt(new Date().toString(), KerberosDemoService.clientSessionKey)
         ].join(KerberosDemoService.stringSeparator); // 174
 
-       return toTgsServer;
+        return toTgsServer;
     }
 
-    private static async fourthStep(message: string): Promise<void> {
+    private static async fourthStep(message: string, userName: string): Promise<string> {
         // 187
         console.info('[STEP 4] Received message from client, decrypting it');
         await sleep(1000);
@@ -119,21 +127,44 @@ export abstract class KerberosDemoService {
         const decryptedTGT: string = DesService.decrypt(toTGSData[0], KerberosDemoService.masterKey);
         const tgtData = decryptedTGT.split(KerberosDemoService.stringSeparator);
 
-        console.info('[STEP 4] I am TGS server and I\'ve received: ')
-        console.info('[STEP 4] ', decryptedTGT)
+        console.info('[STEP 4] I am TGS server and I\'ve received: ');
+        console.info('[STEP 4] ', decryptedTGT);
+
+
+        console.info('[STEP 4] Preparing ticket data');
+        await sleep(1000);
+
+
+        const now: Date = new Date();
+        const tgsBlock: string = [
+            userName,
+            'Read&write access',
+            'ServerName',
+            now.toString(),
+            new Date(now.getTime() + 1000000),
+            KerberosDemoService.keyForInteractionWithSS // keyForInteractionWithSS <==> K[c_ss]
+        ].join(KerberosDemoService.stringSeparator);
+
+        const ticketToServer: string = DesService.encrypt(tgsBlock, KerberosDemoService.serverMasterKey); // Ktgs_ss
+        const ticketToClient: string = [
+            ticketToServer,
+            KerberosDemoService.keyForInteractionWithSS
+        ].join(KerberosDemoService.stringSeparator);
+
+        console.info('[STEP 4] Ticket for client: ' + ticketToClient);
+
         /*
-        timeStamp = DateTime.Parse(DES.Decipher(toTGSData[1], tgtData[0])); // tgtData[0] - session key from TGT
-        var tgtTimeStamp = DateTime.Parse(tgtData[3]); //tgtData[3] - time stamp from TGT
-        if (timeStamp.AddMinutes(2) > tgtTimeStamp) // Timestamp from auth block ~ equals TGT blocks` timestamp
-        {
-            Console.WriteLine("TGS Authentification passed!");
-            Console.WriteLine($"Decripted TGT: {decriptedTGT}\n{new string('-', 40)}");
-        }
-        else
-        {
-            Console.WriteLine("TGS Authentification failed!");
-            Console.ReadLine();
-            return;
-        }*/
+         * 3)
+         * Вся эта структура зашифровывается с помощью сессионного ключа,
+         * который стал доступен пользователю при аутентификации.
+         * После чего эта информация отправляется клиенту.
+         */
+
+        // TGS -> Client
+        console.info('[STEP 4] Encrypting ticket and sending to client');
+        await sleep(1000);
+
+        const encryptedResponseTicket: string = DesService.encrypt(ticketToClient, KerberosDemoService.sessionKey);
+        return encryptedResponseTicket;
     }
 }
