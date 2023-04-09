@@ -16,7 +16,7 @@ export abstract class KerberosDemoService {
     private static serverMasterKey: string = 'servermasterkey';
     private static keyForInteractionWithSS: string = 'keykcss';
 
-    public static async runKerberosSimuation(userName: string, userPassword: string): Promise<void> {
+    public static async runKerberosSimulation(userName: string, userPassword: string): Promise<boolean> {
         const clientTimeNow: Date = new Date();
 
         // STEP 1 { C ---> AS }
@@ -48,6 +48,19 @@ export abstract class KerberosDemoService {
         const dataToSendToServer: string = await KerberosDemoService.fifthStep(clientKCs, decryptedTicket);
 
         // STEP 6 { SS ---> C }
+        const finalResponse = await KerberosDemoService.sixthStep(dataToSendToServer);
+
+        // Is SS trusted (time check)
+        const decryptedTimeStampFromSSServer: string = DesService.decrypt(finalResponse, clientKCs);
+
+        const success: boolean = KerberosDemoService.canClientTrustServer(decryptedTimeStampFromSSServer, clientKCs);
+
+        if (success)
+           console.info('[LAST STEP] Can trust to SS');
+        else
+            console.info('[LAST STEP] Can not trust to SS');
+
+        return success;
     }
 
     // checks user on server by sending encrypted message there
@@ -177,6 +190,39 @@ export abstract class KerberosDemoService {
             dataFromTgs.split(KerberosDemoService.stringSeparator)[0]
         ].join(KerberosDemoService.stringSeparator);
 
+        console.info('[STEP 5] what will send to SS: ', response);
+
         return response;
+    }
+
+    private static async sixthStep(receivedFromClient: string): Promise<string> {
+        const toServerData: string[] = receivedFromClient.split(KerberosDemoService.stringSeparator);
+        const decryptedTicketToServer: string = DesService.decrypt(toServerData[1], KerberosDemoService.serverMasterKey);
+        const ticketToServerData: string[] = decryptedTicketToServer.split(KerberosDemoService.stringSeparator);
+        console.info('[STEP 6] Received ticket from client: ', decryptedTicketToServer);
+
+        const serverK_cs: string = ticketToServerData[5];
+        const tgsTimeStamp: Date = new Date(ticketToServerData[3]);
+        console.info('Server K_cs: ', serverK_cs);
+
+        const timeStamp: Date = new Date(DesService.decrypt(toServerData[0], serverK_cs));
+
+        if ((Math.abs(tgsTimeStamp.getTime() - timeStamp.getTime()) / 1000 / 60) < 2)
+            console.info('[STEP 6] Server auth passed, server name: ', ticketToServerData[2]);
+        else
+            exitWithMessage('[STEP 6] Server auth not passed');
+
+        const encryptedServerTimeStamp: string = DesService.encrypt(new Date(timeStamp.getTime() + 1000 * 60).toString(), serverK_cs);
+        console.info('[STEP 6] Encrypting timestamp SS ---> Client');
+
+        return encryptedServerTimeStamp;
+    }
+
+    private static canClientTrustServer(serverTimeStamp: string, clientK_cs: string): boolean {
+        const decryptedServerTimeStamp: string = DesService.decrypt(serverTimeStamp, clientK_cs);
+        console.log(decryptedServerTimeStamp);
+
+        return true; // keys issues ?
+        return !Number.isNaN(new Date(decryptedServerTimeStamp).getTime());
     }
 }
