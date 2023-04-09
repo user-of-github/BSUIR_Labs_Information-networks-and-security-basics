@@ -136,21 +136,6 @@ export class DesService {
         return response;
     }
 
-    private static convertBytesDecimalArrayToBinaryFormat(source: number[]): string {
-        let response: string = '';
-
-        for (let index: number = 0; index < source.length; ++index) {
-            let charBinary: string = source[index].toString(2);
-
-            while (charBinary.length < DesService.sizeOfChar)
-                charBinary = DesService.zeroBit + charBinary;
-
-            response += charBinary;
-        }
-
-        return response;
-    }
-
     private static convertStringFromBinaryFormatToDecimalBytesArray(sourceString: string): number[] {
         let response: number[] = [];
         let source: string = sourceString;

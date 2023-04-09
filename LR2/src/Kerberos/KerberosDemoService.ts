@@ -45,6 +45,9 @@ export abstract class KerberosDemoService {
         console.info(`user K_cs: ${clientKCs}`);
 
         // STEP 5 { C ---> SS }
+        const dataToSendToServer: string = await KerberosDemoService.fifthStep(clientKCs, decryptedTicket);
+
+        // STEP 6 { SS ---> C }
     }
 
     // checks user on server by sending encrypted message there
@@ -166,5 +169,14 @@ export abstract class KerberosDemoService {
 
         const encryptedResponseTicket: string = DesService.encrypt(ticketToClient, KerberosDemoService.sessionKey);
         return encryptedResponseTicket;
+    }
+
+    private static async fifthStep(clientK_cs: string, dataFromTgs: string): Promise<string> {
+        const response: string = [
+            DesService.encrypt(new Date().toString(), clientK_cs),
+            dataFromTgs.split(KerberosDemoService.stringSeparator)[0]
+        ].join(KerberosDemoService.stringSeparator);
+
+        return response;
     }
 }
