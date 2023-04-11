@@ -1,33 +1,44 @@
 #include <stdio.h>
 #include <string.h>
-#include <sys/socket.h>
 #include <netinet/ip.h>
-#include <arpa/inet.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
 
 int main()
 {
-	int sockfd, newsockfd;
-	struct sockaddr_in my_addr, client_addr;
+	sockaddr_in my_addr {};
+	sockaddr_in client_addr {};
 	char buffer[100];
-	// Step 1: Create a socket
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	// Step 2: Bind to a port number
+
+	// socket itself
+	const auto socket_file_descriptor {socket(AF_INET, SOCK_STREAM, 0)};
+
+	// bind to a port number
 	memset(&my_addr, 0, sizeof(struct sockaddr_in));
 	my_addr.sin_family = AF_INET;
 	my_addr.sin_port = htons(9000);
-	bind(sockfd, (struct sockaddr *)&my_addr, sizeof(struct sockaddr_in));
+	bind(socket_file_descriptor, (struct sockaddr *)&my_addr, sizeof(struct sockaddr_in));
 	// Step 3: Listen for connections
-	listen(sockfd, 5);
-	// Step 4: Accept a connection request
-	int client_len = sizeof(client_addr);
+	listen(socket_file_descriptor, 5);
 
-	newsockfd = accept(sockfd, (struct sockaddr *)&client_addr, (socklen_t *)&client_len);
-	// Step 5: Read data from the connection
-	memset(buffer, 0, sizeof(buffer));
-	int len = read(newsockfd, buffer, 100);
-	printf("Received %d bytes: %s", len, buffer);
-	// Step 6: Close the connection
-	close(newsockfd); close(sockfd);
+	const auto client_len {sizeof(client_addr)};
+
+	while (true) {
+		const auto new_socket_file_descriptor {accept(socket_file_descriptor, (struct sockaddr *)&client_addr,(socklen_t  *)&client_len)};
+
+		if (fork() == 0) { // The child process ➀
+			close (socket_file_descriptor);
+			// Read data.
+			memset(buffer, 0, sizeof(buffer));
+			int len = read(new_socket_file_descriptor, buffer, 100);
+			printf("Received %d bytes.\n%s\n", len, buffer);
+			close (new_socket_file_descriptor);
+			return 0;
+		} else { // The parent process
+			close (new_socket_file_descriptor);
+		}
+	}
 	return 0;
 }
