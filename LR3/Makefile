@@ -1,4 +1,4 @@
-all: client server
+all: client server attack
 
 clean:
 	rm -rf client_app
