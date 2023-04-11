@@ -7,10 +7,10 @@ clean:
 
 
 client:
-	g++ -o client_app ./client.cpp
+	g++ -o client_app ./client.cpp ./shared.hpp -std=c++17
 
 server:
-	g++ -o server_app ./server.cpp
+	g++ -o server_app ./server.cpp ./shared.hpp -std=c++17
 
 attack:
-	g++ -o attack_app ./attack.cpp
+	g++ -o attack_app ./attack.cpp ./shared.hpp -std=c++17
