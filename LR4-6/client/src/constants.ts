@@ -1,0 +1,2 @@
+export const LS_AUTH_STATUS: string = 'AUTHORIZED_SANATORIUM_STATUS'
+export const LS_AUTH_DATA: string = 'AUTHORIZED_SANATORIUM_DATA'
