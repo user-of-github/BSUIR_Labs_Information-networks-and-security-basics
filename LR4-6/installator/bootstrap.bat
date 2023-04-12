@@ -1,6 +1,6 @@
 call npm install
 
-call ts-node installer.ts
+call node installer.js
 
 cd app
 
